@@ -39,7 +39,7 @@ func New(ctx context.Context, port string, lingua *lingua.Lingua) {
 	}()
 }
 
-type response struct {
+type responseLang struct {
 	Code     int `json:"code"`
 	Iso639_3 int `json:"iso_693_3"`
 }
@@ -51,15 +51,15 @@ func (c *myHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	language, ok := c.detector.DetectLanguageOf(text)
-	if !ok {
-		http.Error(w, "cannot determine language", http.StatusBadRequest)
-		return
-	}
+	languages := c.detector.DetectMultipleLanguagesOf(text)
 
-	resp := &response{
-		Code:     int(language),
-		Iso639_3: int(language.IsoCode639_3()),
+	resp := make([]responseLang, len(languages))
+
+	for i, lang := range languages {
+		resp[i] = responseLang{
+			Code:     int(lang.Language()),
+			Iso639_3: int(lang.Language().IsoCode639_3()),
+		}
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
