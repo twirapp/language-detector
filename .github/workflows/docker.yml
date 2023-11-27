@@ -5,6 +5,10 @@ on:
     branches:
       - "main"
 
+
+permissions:
+  actions: read|write
+
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -28,3 +32,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/twirapp/language-detector:latest
+          cache-from: type=gha,scope=twir-language-detector
+          cache-to: type=gha,mode=max,scope=twir-language-detector
