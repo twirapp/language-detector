@@ -23,15 +23,14 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: twirapp
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_REGISTRY_LOGIN }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/twirapp/language-detector:latest
+          tags: twirapp/language-detector:latest
           cache-from: type=gha,scope=twir-language-detector
           cache-to: type=gha,mode=max,scope=twir-language-detector
