@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/twirapp/language-detector/internal/http"
-	"github.com/twirapp/language-detector/internal/lingua"
+	"github.com/twirapp/language-detector/internal/predictor"
 )
 
 func main() {
@@ -23,8 +23,11 @@ func main() {
 		appEnv = "development"
 	}
 
-	lingua := lingua.New(appEnv)
-	http.New(appCtx, port, lingua)
+	pr, err := predictor.New()
+	if err != nil {
+		panic(err)
+	}
+	http.New(appCtx, port, pr)
 
 	exitSignal := make(chan os.Signal, 1)
 	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)

@@ -5,18 +5,20 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"slices"
+	"strings"
 
-	l "github.com/pemistahl/lingua-go"
-	"github.com/twirapp/language-detector/internal/lingua"
+	iso6391 "github.com/emvi/iso-639-1"
+	"github.com/twirapp/language-detector/internal/predictor"
 )
 
 type myHttp struct {
-	detector *lingua.Lingua
+	detector *predictor.Predictor
 }
 
-func New(ctx context.Context, port string, lingua *lingua.Lingua) {
+func New(ctx context.Context, port string, predictor *predictor.Predictor) {
 	server := &http.Server{Addr: "0.0.0.0:" + port, Handler: &myHttp{
-		detector: lingua,
+		detector: predictor,
 	}}
 	go func() {
 		log.Printf("Starting listening on %s port\n", port)
@@ -41,9 +43,9 @@ func New(ctx context.Context, port string, lingua *lingua.Lingua) {
 }
 
 type responseLang struct {
-	Code     int    `json:"code"`
-	Iso639_3 int    `json:"iso_693_3"`
-	Name     string `json:"name"`
+	Iso639_1   string `json:"iso_693_1"`
+	Name       string `json:"name"`
+	NativeName string `json:"native_name"`
 }
 
 func (c *myHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -58,15 +60,21 @@ func (c *myHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	languages := c.detector.DetectMultipleLanguagesOf(text)
+	languages, err := c.detector.Predict(text)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 
 	resp := make([]responseLang, len(languages))
 
 	for i, lang := range languages {
+		parsedLang := iso6391.FromCode(lang.Label)
+
 		resp[i] = responseLang{
-			Code:     int(lang.Language()),
-			Iso639_3: int(lang.Language().IsoCode639_3()),
-			Name:     lang.Language().String(),
+			Name:       parsedLang.Name,
+			Iso639_1:   parsedLang.Code,
+			NativeName: parsedLang.NativeName,
 		}
 	}
 
@@ -76,15 +84,25 @@ func (c *myHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *myHttp) allLanguagesController(w http.ResponseWriter, r *http.Request) {
-	resp := make([]responseLang, len(l.AllLanguages()))
+	allLangs := iso6391.Languages
+	resp := make([]responseLang, 0, len(allLangs))
 
-	for i, lang := range l.AllLanguages() {
-		resp[i] = responseLang{
-			Code:     int(lang),
-			Iso639_3: int(lang.IsoCode639_3()),
-			Name:     lang.String(),
-		}
+	for _, lang := range allLangs {
+		resp = append(
+			resp,
+			responseLang{
+				Name:       lang.Name,
+				Iso639_1:   lang.Code,
+				NativeName: lang.NativeName,
+			},
+		)
 	}
+
+	slices.SortFunc(resp, func(a, b responseLang) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
+	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)
