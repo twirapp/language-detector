@@ -9,13 +9,26 @@ import (
 func TestNew(t *testing.T) {
 	instance := New("development")
 
-	lang, ok := instance.DetectLanguageOf("Привет как твои дела?")
-
-	if !ok {
-		t.Error("cannot determine language")
+	cases := []struct {
+		text string
+		want lingua.Language
+	}{
+		{"re how are you", lingua.English},
+		{"я кто", lingua.Russian},
+		{"Привет, как твои дела?", lingua.Russian},
+		{"漢語漢語", lingua.Chinese},
 	}
 
-	if lang != lingua.Russian {
-		t.Error("language is not russian")
+	for _, c := range cases {
+		lang, ok := instance.DetectLanguageOf(c.text)
+
+		if !ok {
+			t.Errorf(`"%s" got %v, want %v`, c.text, ok, true)
+			continue
+		}
+
+		if lang != c.want {
+			t.Errorf(`"%s" got %v, want %v`, c.text, lang, c.want)
+		}
 	}
 }
