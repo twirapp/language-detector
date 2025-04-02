@@ -15,6 +15,7 @@ func TestNew(t *testing.T) {
 	}{
 		{"re how are you", lingua.English},
 		{"я кто", lingua.Russian},
+		{"привет", lingua.Russian},
 		{"Привет, как твои дела?", lingua.Russian},
 		{"漢語漢語", lingua.Chinese},
 	}
