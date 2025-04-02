@@ -11,7 +11,7 @@ type Lingua struct {
 func New(appEnv string) *Lingua {
 	detector := l.NewLanguageDetectorBuilder().
 		FromAllLanguages().
-		WithMinimumRelativeDistance(0.9).
+		WithMinimumRelativeDistance(0.01).
 		Build()
 
 	return &Lingua{
