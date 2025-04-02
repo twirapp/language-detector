@@ -1,19 +1,11 @@
 package predictor
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/nano-interactive/go-fasttext"
 )
 
-func New() (*Predictor, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	ff, err := fasttext.Open(filepath.Join(cwd, "lid.176.bin"))
+func New(modelPath string) (*Predictor, error) {
+	ff, err := fasttext.Open(modelPath)
 	if err != nil {
 		return nil, err
 	}

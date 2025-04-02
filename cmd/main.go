@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,6 +10,8 @@ import (
 	"github.com/twirapp/language-detector/internal/http"
 	"github.com/twirapp/language-detector/internal/predictor"
 )
+
+var modelPath string
 
 func main() {
 	appCtx, appCtxCancel := context.WithCancel(context.Background())
@@ -23,7 +26,20 @@ func main() {
 		appEnv = "development"
 	}
 
-	pr, err := predictor.New()
+	//lid.176.bin
+
+	flag.StringVar(&modelPath, "modelpath", "", "Path to lang model")
+	flag.Parse()
+
+	if modelPath == "" {
+		wd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		modelPath = wd + "/lid.176.bin"
+	}
+
+	pr, err := predictor.New(modelPath)
 	if err != nil {
 		panic(err)
 	}

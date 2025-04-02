@@ -24,4 +24,4 @@ RUN apk add --no-cache \
 
 COPY --from=builder /app/twir_application /bin/twir_application
 COPY --from=builder /app/lid.176.bin /app/lid.176.bin
-CMD ["/bin/twir_application"]
+CMD ["/bin/twir_application", "-modelpath", "/app/lid.176.bin"]
