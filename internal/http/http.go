@@ -43,7 +43,7 @@ func New(ctx context.Context, port string, predictor *predictor.Predictor) {
 }
 
 type responseLang struct {
-	Iso639_1   string `json:"iso_693_1"`
+	Iso639_1   string `json:"iso_639_1"`
 	Name       string `json:"name"`
 	NativeName string `json:"native_name"`
 }
