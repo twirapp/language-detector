@@ -1,6 +1,7 @@
 package predictor
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -30,6 +31,8 @@ type Prediction struct {
 func (p *Predictor) Predict(text string) ([]Prediction, error) {
 	cleanedText := cleanText(text)
 
+	fmt.Println(cleanedText)
+
 	predictions, err := p.ff.Predict(cleanedText, 1, 0)
 	if err != nil {
 		return nil, err
@@ -46,7 +49,7 @@ func (p *Predictor) Predict(text string) ([]Prediction, error) {
 	return pr, nil
 }
 
-var symbolsRegexp = regexp.MustCompile(`[\d\W_]+`)
+var symbolsRegexp = regexp.MustCompile(`(?mi)[\d\p{P}\p{S}]+`)
 
 func cleanText(text string) string {
 	cleaned := symbolsRegexp.ReplaceAllString(text, " ")

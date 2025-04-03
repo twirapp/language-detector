@@ -62,6 +62,7 @@ func (c *myHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	languages, err := c.detector.Predict(text)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -79,6 +80,7 @@ func (c *myHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Println(err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 	}
 }
@@ -105,6 +107,7 @@ func (c *myHttp) allLanguagesController(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Println(err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 	}
 }
