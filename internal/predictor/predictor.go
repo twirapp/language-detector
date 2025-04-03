@@ -1,6 +1,9 @@
 package predictor
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/nano-interactive/go-fasttext"
 )
 
@@ -25,7 +28,9 @@ type Prediction struct {
 }
 
 func (p *Predictor) Predict(text string) ([]Prediction, error) {
-	predictions, err := p.ff.Predict(text, 1, 0)
+	cleanedText := cleanText(text)
+
+	predictions, err := p.ff.Predict(cleanedText, 1, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -39,4 +44,15 @@ func (p *Predictor) Predict(text string) ([]Prediction, error) {
 	}
 
 	return pr, nil
+}
+
+var symbolsRegexp = regexp.MustCompile(`[\d\W_]+`)
+
+func cleanText(text string) string {
+	cleaned := symbolsRegexp.ReplaceAllString(text, " ")
+	cleaned = strings.Join(strings.Fields(cleaned), " ")
+	cleaned = strings.ToLower(cleaned)
+	cleaned = strings.TrimSpace(cleaned)
+
+	return cleaned
 }
