@@ -1,6 +1,8 @@
 FROM golang:1.24-alpine as builder
 WORKDIR /app
 
+RUN wget https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin
+
 RUN apk add --no-cache --update \
     gcc \
     musl-dev \
@@ -9,8 +11,6 @@ RUN apk add --no-cache --update \
 
 COPY go.mod go.sum ./
 RUN go mod download
-
-RUN wget https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin
 
 COPY . .
 
